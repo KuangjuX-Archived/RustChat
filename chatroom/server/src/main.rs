@@ -3,11 +3,14 @@ use std::net::TcpListener;
 use std::sync::mpsc;
 use std::thread;
 
+mod protocol;
+use protocol::protocol_handler;
+
 // Localhost with a port in it
 const LOCAL_HOST: &str = "127.0.0.1:8080";
 
 // The buffer size of messages
-const MESSAGE_SIZE: usize = 32;
+const MESSAGE_SIZE: usize = 1024;
 
 
 /*
