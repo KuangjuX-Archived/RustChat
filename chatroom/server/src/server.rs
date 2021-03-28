@@ -3,8 +3,7 @@ use std::net::{ TcpListener, SocketAddr };
 use std::sync::mpsc;
 use std::thread;
 
-// The buffer size of messages
-const MESSAGE_SIZE: usize = 1024;
+use super::*;
 
 
 
@@ -67,6 +66,10 @@ impl Server{
         // Instantiate channel and assign it to a string type
         // We are going to be sending a bunch of strings through channel
         let (sender, receiver) = mpsc::channel::<String>();
+
+        println!("********************************");
+        println!("Welcome to KuangjuX Naive Server");
+        println!("********************************");
         
         loop 
         {   
@@ -115,7 +118,8 @@ impl Server{
                     */   
                     Server::sleep();
                 }); 
-            }      
+            } 
+
             if let Ok(message) = receiver.try_recv() 
             {
                 clients = clients.into_iter().filter_map(|mut client| 
@@ -133,6 +137,7 @@ impl Server{
                     client.write_all(&buffer).map(|_| client).ok()
                 }).collect::<Vec<_>>();
             }
+
                 Server::sleep();
         }
     }
