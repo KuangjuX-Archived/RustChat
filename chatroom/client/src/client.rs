@@ -43,22 +43,6 @@ impl Client {
         println!("Message :{:?}", message);
     }
 
-    pub fn parse_protocol(message: &mut String){
-        if message.as_str().starts_with(NMTP){
-            // *message = String::from(NMTP);
-            mtp_handler(message);
-        }else if message.as_str().starts_with(NFTP){
-            // *message = String::from(NFTP);
-            ftp_handler(message);
-        }else if message.as_str().starts_with(NVOIP){
-            *message = String::from(NVOIP);
-        }else if message == "exit"{
-            // If message is equivalent to : exit we'll break out of our loop
-            *message = String::from("exit");
-        }else{
-            panic!("Error Protocol!");
-        }
-    }
 
     // client run!
     pub fn run(&self, mut client: TcpStream){
@@ -139,12 +123,12 @@ impl Client {
             // Use the to string method to put it into a message variable 
             let mut message = buffer.trim().to_string();
 
-            Client::parse_protocol(&mut message);
+            parse_protocol(&mut message);
 
+
+            // If message is equivalent to : exit we'll break out of our loop
             if message == "exit" || sender.send(message).is_err(){break}
 
-            // If message is equivalent to : exit we'll break out of our loop 
-            // if message == "exit" || sender.send(message).is_err() {break}
         }
         // Print out GOOD BYE
         println!("*********************************");

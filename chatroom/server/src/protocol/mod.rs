@@ -1,5 +1,21 @@
 mod handler;
+mod utils;
 pub use handler::*;
+pub use utils::*;
 
-pub const MESSAGE_OK_RESPONSE: &'static str = "NMTP/1.0 200\r\n Response:{}\r\n END";
-pub const MESSAGE_FAIL_RESPONSE: &'static str = "NMTP/1.0 500\r\n Fail to get message\r\n END";
+
+// NMTP is Naive Message Transfor Protocol 
+pub const NMTP: &'static str = "NMTP: ";
+
+// NFTP is Naive File Transfor Protocol
+pub const NFTP: &'static str = "NFTP: "; 
+
+// Server file response 
+pub const FILE_SUCCESS: &'static str = "Succeed to download file!";
+pub const FILE_FAIL: &'static str = "Fail to download file!";
+
+pub const FILE_SUCCESS_RESPONSE: &'static str = "Server has succeeded to download file!";
+pub const FILE_FAIL_RESPONSE: &'static str = "Server failed to download file!";
+
+// NVoIP is Naive Voice over Internet Protoco
+pub const NVOIP: &'static str = "NVoIP: "; 

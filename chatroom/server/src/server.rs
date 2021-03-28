@@ -4,7 +4,7 @@ use std::sync::mpsc;
 use std::thread;
 
 use super::*;
-
+use protocol::*;
 
 
 pub struct Server{
@@ -45,9 +45,12 @@ impl Server{
         // Collect them inside of out vector 
         let message = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
         // Convert slice of strings into an actual string 
-        let message = String::from_utf8(message).expect("Invalid utf8 message");
+        let mut message = String::from_utf8(message).expect("Invalid utf8 message");
         // Print out the address sent the message
-        println!("{}: {:?}", address, message);
+        // println!("{}: {:?}", address, message);
+
+        // Parse Protocol from buffer and build message
+        parse_protocol(&mut message);
 
         // Concatenate address with message
         let message = format!(
@@ -140,5 +143,10 @@ impl Server{
 
                 Server::sleep();
         }
+
+        // Print out GOOD BYE
+        println!("*********************************");
+        println!("*********** GOOD BYE ************");
+        println!("*********************************");
     }
 }

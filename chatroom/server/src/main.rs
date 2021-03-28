@@ -1,6 +1,7 @@
 mod server;
 use server::*;
 
+mod protocol;
 // Localhost with a port in it
 const LOCAL_HOST: &str = "127.0.0.1:8080";
 
