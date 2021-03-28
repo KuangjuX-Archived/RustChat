@@ -27,7 +27,7 @@ pub fn mtp_handler(message: &mut String){
     let s:Vec<&str> = message.split(NMTP).collect();
     *message = format!(
         "{}: {}",
-        s[0], s[1]
+        "NMTP", s[1]
     );
 }
 
