@@ -7,7 +7,6 @@ use std::str;
 use super::*;
 use protocol::*;
 
-use super::*;
 
 pub struct Client{
     ip: &'static str

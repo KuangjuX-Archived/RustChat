@@ -13,9 +13,14 @@ use audio::Audio;
 
 fn main() 
 {   
-    let mut pcm = Audio::new();
-    let mut hwp = Audio::set_hw(&pcm);
-    Audio::write(&pcm, &hwp);
+    let capture_pcm = Audio::capture();
+    let playback_pcm = Audio::playback();
+    // let hwp = Audio::set_hw(&pcm);
+    Audio::set_hw(&capture_pcm);
+    Audio::set_hw(&playback_pcm);
+    // Audio::write(&pcm);
+    let sound = Audio::read(&capture_pcm);
+    Audio::write(&playback_pcm, sound);
 
     let client = Client::new(LOCAL_HOST);
     let connect = client.connect();
