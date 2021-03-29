@@ -1,5 +1,5 @@
 [package]
-name = "chatroom"
+name = "audio"
 version = "0.1.0"
 authors = ["KuangjuX <qcx@tju.edu.cn>"]
 edition = "2018"
@@ -7,13 +7,5 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+alsa = "*"
 cpal = "0.13.2"
-audio = { path = 'src/audio' }
-
-[[bin]]
-name = "server"
-path = "src/server/smain.rs"
-
-[[bin]]
-name = "client"
-path = "src/client/cmain.rs"
