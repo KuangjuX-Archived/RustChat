@@ -9,11 +9,14 @@ const MESSAGE_SIZE: usize = 1024 * 1024;
 
 mod client;
 use client::*;
-use audio::audio;
+use audio::Audio;
 
 fn main() 
 {   
-    audio::setup();
+    let mut pcm = Audio::new();
+    let mut hwp = Audio::set_hw(&pcm);
+    Audio::write(&pcm, &hwp);
+
     let client = Client::new(LOCAL_HOST);
     let connect = client.connect();
     client.run(connect);

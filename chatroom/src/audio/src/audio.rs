@@ -1,47 +1,52 @@
-use cpal::traits::{ HostTrait, DeviceTrait, StreamTrait };
-use cpal::{ Data, Sample, SampleFormat };
+use alsa::{ Direction, ValueOr };
+use alsa::pcm::{PCM, HwParams, Format, Access, State };
 pub struct Audio {}
 
 impl Audio {
+    // Open default playback device
+    pub fn new() -> PCM {
+        PCM::new("default", Direction::Playback, false).unwrap()
+    }
 
-}
+    // Set hardware parameters: 44100 Hz / Mono / 16 bit
+    pub fn set_hw(pcm: &PCM) -> HwParams {
+        let hwp = HwParams::any(&pcm).unwrap();
+        hwp.set_channels(1).unwrap();
+        hwp.set_rate(44100, ValueOr::Nearest).unwrap();
+        hwp.set_format(Format::s16()).unwrap();
+        hwp.set_access(Access::RWInterleaved).unwrap();
+        pcm.hw_params(&hwp).unwrap();
 
-pub fn setup() {
-    let host  = cpal::default_host();
-    let device = host.default_output_device().expect("No available output device");
+        hwp
+    }
 
-    println!("Sound Device: {}", device.name().unwrap());
+    pub fn read(pcm: &mut PCM, hwp: &mut HwParams) {
 
-    let mut supported_configs_range = device.supported_output_configs()
-                                      .expect("errors while querying configs");
+    }
 
-    let supported_config = supported_configs_range.next().expect("No expected config")
-                           .with_max_sample_rate();
+    pub fn write(pcm: &PCM, hwp: &HwParams){
+        let io = pcm.io_i16().unwrap();
 
-    println!("supported config: {:?}", supported_config);
+        // Make sure we don't start the stream too early
+        let hwp = pcm.hw_params_current().unwrap();
+        let swp = pcm.sw_params_current().unwrap();
+        swp.set_start_threshold(hwp.get_buffer_size().unwrap() - hwp.get_period_size().unwrap()).unwrap();
+        pcm.sw_params(&swp).unwrap();
 
-    
-    let err_fn = |err| eprintln!("an error occurred on the output audio stream: {}", err);
-    let sample_format = supported_config.sample_format();
-    let config = supported_config.into();
+        // Make a sine wave
+        let mut buf = [0i16; 1024];
+        for (i, a) in buf.iter_mut().enumerate() {
+            *a = ((i as f32 * 2.0 * ::std::f32::consts::PI / 128.0).sin() * 8192.0) as i16
+        }
 
-    println!("{:?}", sample_format);
-    let stream = match sample_format {
-        SampleFormat::F32 => device.build_output_stream(&config, write_silence::<f32>, err_fn),
-        SampleFormat::I16 => device.build_output_stream(&config, write_silence::<i16>, err_fn),
-        SampleFormat::U16 => device.build_output_stream(&config, write_silence::<u16>, err_fn),
-    }.unwrap();
+        // Play it back for 2 seconds.
+        for _ in 0..2*44100/1024 {
+            assert_eq!(io.writei(&buf[..]).unwrap(), 1024);
+        }
 
-
-    // println!("{}", stream);
-
-    stream.play().unwrap();
-    // stream.pause().unwrap();
-}
-
-fn write_silence<T: Sample>(data: &mut [T], _: &cpal::OutputCallbackInfo) {
-    for (i, sample) in data.iter_mut().enumerate() {
-        println!("i: {}", i);
-        *sample = Sample::from(& ((i as f32 * 2.0 * ::std::f32::consts::PI / 128.0).sin() * 8192.0));
+        // In case the buffer was larger than 2 seconds, start the stream manually.
+        if pcm.state() != State::Running { pcm.start().unwrap() };
+        // Wait for the stream to finish playback.
+        pcm.drain().unwrap();
     }
 }
