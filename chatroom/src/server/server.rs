@@ -68,7 +68,7 @@ impl Server{
 
         // Instantiate channel and assign it to a string type
         // We are going to be sending a bunch of strings through channel
-        let (sender, receiver) = mpsc::channel::<String>();
+        let (sender, receiver) = mpsc::channel::<Vec<u8>>();
 
         println!("********************************");
         println!("Welcome to KuangjuX Naive Server");
@@ -99,8 +99,9 @@ impl Server{
                     {
                         Ok(_) => {
                             let message = Server::build_message(buffer, address);
+                            let bytes = message.clone().into_bytes();
                             // Sent out message through our sender to our receiver
-                            sender.send(message).expect("Failed to send message to receiver");
+                            sender.send(bytes).expect("Failed to send message to receiver");
                         },
                         /* 
                         * If the type of error is equal to an error that would block our non-blocking,
@@ -129,7 +130,7 @@ impl Server{
                 {
                     // Set the buffer equal to message that clone into bytes 
                     // Convert our messages into bytes
-                    let mut buffer = message.clone().into_bytes();
+                    let mut buffer = message.clone();
                     // Resize buffer based on our message size 
                     buffer.resize(MESSAGE_SIZE, 0);
                     // Take our client 

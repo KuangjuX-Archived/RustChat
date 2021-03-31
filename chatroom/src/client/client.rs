@@ -33,7 +33,7 @@ impl Client {
 
 
     // display message in console
-    pub fn display(buffer: Vec<u8>) {
+    pub fn display(buffer: Vec<u8>) -> bool {
         // Let message equal our buffer 
         // Turn it into an iterator 
         // Check to see if the references inside of it are equal to 0 
@@ -42,6 +42,11 @@ impl Client {
         let message = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
         let message = str::from_utf8(&message).unwrap();
         println!("Message :{:?}", message);
+        if message.starts_with("NVoIP"){
+            true
+        }else{
+            false
+        }
     }
 
 
@@ -49,7 +54,7 @@ impl Client {
     pub fn run(&self, mut client: TcpStream){
         // Instantiate channel and assign it to a string type
         // We are going to be sending a bunch of strings through channel
-        let (sender, receiver) = mpsc::channel::<String>();
+        let (sender, receiver) = mpsc::channel::<Vec<u8>>();
 
         // Spawn a thread and create a move closure inside of it with a loop
         thread::spawn(move || loop 
@@ -62,7 +67,15 @@ impl Client {
                 Ok(_) => 
                 {
                     // Receive message and display in console
-                    Client::display(buffer);
+                    if Client::display(buffer) {
+                        // PalyBack by default linux device
+                        let mut sound = vec![0;MESSAGE_SIZE];
+                        client.read_exact(&mut sound).unwrap();
+                        let pcm = Audio::new_playback();
+                        Audio::set_hw(&pcm);
+                        let sound = Audio::u8_to_i16(&sound[..]);
+                        Audio::play(&pcm, sound);
+                    }
                 },
 
                 /* 
@@ -85,7 +98,7 @@ impl Client {
                 {
                     // Clone message into bytes
                     // Put it inside of a buffer variable
-                    let mut buffer = message.clone().into_bytes();
+                    let mut buffer = message.clone();
                     // Resize our buffer by our message size
                     buffer.resize(MESSAGE_SIZE, 0);
                     // Write all of our buffers into our client
@@ -124,11 +137,15 @@ impl Client {
             // Use the to string method to put it into a message variable 
             let mut message = buffer.trim().to_string();
 
-            parse_protocol(&mut message);
+            if let Some(sound) = parse_protocol(&mut message){
+                let bytes = message.clone().into_bytes();
+                if sender.send(bytes).is_err(){break}
+                if sender.send(sound).is_err(){break}
+            }
 
-
+            let bytes = message.clone().into_bytes();
             // If message is equivalent to : exit we'll break out of our loop
-            if message == "exit" || sender.send(message).is_err(){break}
+            if message == "exit" || sender.send(bytes).is_err(){break}
 
         }
         // Print out GOOD BYE
