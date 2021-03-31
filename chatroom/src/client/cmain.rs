@@ -13,14 +13,20 @@ use audio::Audio;
 
 fn main() 
 {   
-    let capture_pcm = Audio::capture();
-    let playback_pcm = Audio::playback();
-    // let hwp = Audio::set_hw(&pcm);
+    // get linux default capture device
+    let capture_pcm = Audio::new_capture();
+    // get linux default playback device
+    let playback_pcm = Audio::new_playback();
+
+    // set device hardware: 44100HZ; Mono; 16bits
     Audio::set_hw(&capture_pcm);
     Audio::set_hw(&playback_pcm);
-    // Audio::write(&pcm);
-    let sound = Audio::read(&capture_pcm);
-    Audio::write(&playback_pcm, sound);
+
+    // capture sound by default device
+    let sound = Audio::capture(&capture_pcm);
+
+    // playback sound which has been captured
+    Audio::play(&playback_pcm, &sound);
 
     let client = Client::new(LOCAL_HOST);
     let connect = client.connect();
