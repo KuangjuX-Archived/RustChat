@@ -58,7 +58,7 @@ impl Client {
     * Sleep function will allow our thread to sleep for a moment.
     * Our thread will sleep for a hundred milliseconds between each of the loops.
     */    
-    fn sleep() 
+    pub fn sleep() 
     {
         thread::sleep(::std::time::Duration::from_millis(100));
     }
@@ -86,7 +86,7 @@ impl Client {
                         // PalyBack by default linux device
                         let mut sound = vec![0;MESSAGE_SIZE];
 
-                        // Sleep some times
+                        // Sleep some times for receive sound buffers
                         Client::sleep();
                         client.read_exact(&mut sound).expect("Fail to get sound");
                         // Debug
@@ -151,7 +151,7 @@ impl Client {
             // Create a new mutable string
             let mut buffer = String::new();
             // Remind user to input:
-            println!("Please Input something: (input 'help' to get maunual)");
+            println!("Please Input something (input 'help' to get maunual): ");
             // Read into that string from our standard input
             io::stdin().read_line(&mut buffer).expect("Reading from stdin failed");
             // Trim our buffer 
