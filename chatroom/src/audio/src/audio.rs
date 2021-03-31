@@ -2,6 +2,8 @@ use alsa::{ Direction, ValueOr };
 use alsa::pcm::{PCM, HwParams, Format, Access, State };
 pub struct Audio {}
 
+pub const SAMPLE_RATE:usize = 44100;
+
 impl Audio {
     // Open default playback device
     pub fn new_playback() -> PCM {
@@ -16,7 +18,7 @@ impl Audio {
     pub fn set_hw(pcm: &PCM) {
         let hwp = HwParams::any(&pcm).unwrap();
         hwp.set_channels(1).unwrap();
-        hwp.set_rate(44100, ValueOr::Nearest).unwrap();
+        hwp.set_rate(SAMPLE_RATE as u32, ValueOr::Nearest).unwrap();
         hwp.set_format(Format::s16()).unwrap();
         hwp.set_access(Access::RWInterleaved).unwrap();
         pcm.hw_params(&hwp).unwrap();
@@ -31,13 +33,16 @@ impl Audio {
         pcm.sw_params(&swp).unwrap();
     }
 
-    pub fn capture(pcm: &PCM) -> [i16; 44100*10]{
+    pub fn capture(pcm: &PCM, size: usize) -> [i16; 44100*10]{
+        // capture sound must be more than 1s.
+        assert!(size > SAMPLE_RATE, "Too short sound");
+
         let io = pcm.io_i16().unwrap();
         Audio::set_params(pcm);
 
         let mut buf = [0i16; 44100*10];
         
-        io.readi(&mut buf[..]).unwrap();
+        io.readi(&mut buf[0..size]).unwrap();
 
         println!("Sound Capture: {:?}", buf);
 

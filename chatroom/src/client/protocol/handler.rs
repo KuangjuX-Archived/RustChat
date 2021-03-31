@@ -1,6 +1,9 @@
 use std::fs;
 use super::*;
 use crate::MESSAGE_SIZE;
+use audio::{ SAMPLE_RATE, Audio };
+
+use std::str::FromStr;
 
 // Parse protocal by message from stdin
 pub fn parse_protocol(message: &mut String){
@@ -11,7 +14,8 @@ pub fn parse_protocol(message: &mut String){
         // *message = String::from(NFTP);
         ftp_handler(message);
     }else if message.as_str().starts_with(NVOIP){
-        *message = String::from(NVOIP);
+        // *message = String::from(NVOIP);
+        voip_handler(message);
     }else if message == "exit"{
         // If message is equivalent to : exit we'll break out of our loop
         *message = String::from("exit");
@@ -47,6 +51,26 @@ pub fn ftp_handler(message: &mut String){
     
 }
 
-// pub fn voip_handler(){
+pub fn voip_handler(message: &mut String) {
+    let s: Vec<&str> = message.split(' ').collect();
+    let size = s[1];
+    let size:usize = usize::from_str(size).expect("Fail to convert to usize");
+    assert!(size > 10, "Too long sound length");
 
-// }
+    // count the size of buffer to capture sound
+    let buffer_size = size * SAMPLE_RATE;
+
+    // get linux default capture deivce
+    let pcm = Audio::new_capture();
+
+    // set hardware params in pcm
+    Audio::set_hw(&pcm);
+
+    // get sound from audio
+    println!("Please input sound:");
+    let sound = Audio::capture(&pcm, buffer_size);
+    let sound = &sound[0..buffer_size];
+
+
+
+}
