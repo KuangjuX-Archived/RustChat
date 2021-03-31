@@ -5,6 +5,7 @@ use std::thread;
 
 use super::*;
 use protocol::*;
+// use audio::Audio;
 
 
 pub struct Server{
@@ -38,7 +39,7 @@ impl Server{
 
     
     
-    fn build_message(buffer: Vec<u8>, address: SocketAddr) -> String{
+    fn build_message(buffer: Vec<u8>, address: SocketAddr) -> (String, bool){
         // Take the message that we're receiving 
         // Convert it into an iterator 
         // Take all the characters that are not whitespaces
@@ -50,7 +51,7 @@ impl Server{
         // println!("{}: {:?}", address, message);
 
         // Parse Protocol from buffer and build message
-        parse_protocol(&mut message);
+        let is_voip:bool =  parse_protocol(&mut message);
 
         // Concatenate address with message
         let message = format!(
@@ -59,7 +60,7 @@ impl Server{
             message
         );
 
-        message
+        ( message, is_voip )
     }
 
     pub fn run(&self, listener: TcpListener){
@@ -98,10 +99,21 @@ impl Server{
                     match socket.read_exact(&mut buffer) 
                     {
                         Ok(_) => {
-                            let message = Server::build_message(buffer, address);
+                            let (message, is_voip) = Server::build_message(buffer, address);
                             let bytes = message.clone().into_bytes();
                             // Sent out message through our sender to our receiver
                             sender.send(bytes).expect("Failed to send message to receiver");
+                            if is_voip {
+                                let mut sound = vec![0; MESSAGE_SIZE];
+                                socket.read_exact(&mut sound).expect("Fail to receive sound from client");
+                                sender.send(sound).expect("Fail to send sound to receiver");
+
+                                // test receive sound here
+                                // let pcm = Audio::new_playback();
+                                // Audio::set_hw(&pcm);
+                                // let sound = Audio::u8_to_i16(&sound[..]);
+                                // Audio::play(&pcm, sound);
+                            }
                         },
                         /* 
                         * If the type of error is equal to an error that would block our non-blocking,

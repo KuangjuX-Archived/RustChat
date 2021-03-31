@@ -1,0 +1,5 @@
+We have three protocols for KuangjuX Chatroom:
+Message: You can input 'NMTP: ' and add your message to chat;
+File: You can input 'NFTP: ' and add your file path which you need uploaded;
+Audio: You can input 'NVoIP: ' and add your speech interval(seconds);
+Warning: you have to limit your speech time less than 10s

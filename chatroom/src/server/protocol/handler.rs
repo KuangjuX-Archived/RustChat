@@ -2,19 +2,25 @@ use std::fs;
 use std::io::prelude::*;
 use super::*;
 
-
 // Parse protocal by message from TcpStream
-pub fn parse_protocol(message: &mut String){
+pub fn parse_protocol(message: &mut String) -> bool{
     println!("{}", message);
     if message.as_str().starts_with(NMTP){
         mtp_handler(message);
+        false
     }else if message.as_str().starts_with(NFTP){
         ftp_handler(message);
+        false
     }else if message.as_str().starts_with(NVOIP){
-        *message = String::from(NVOIP);
+        voip_handler(message);
+        true
+    }else if message == "help"{
+        *message = String::from("Client view the help manual.");
+        false
     }else if message == "exit"{
         // If message is equivalent to : exit we'll break out of our loop
         *message = String::from("exit");
+        false
     }else{
         panic!("Error Protocol!");
     }
@@ -65,4 +71,8 @@ pub fn ftp_handler(message: &mut String){
         }
     }
 
+}
+
+pub fn voip_handler(message: &mut String) {
+    *message = String::from("NVoIP");
 }

@@ -5,6 +5,8 @@ use audio::{ SAMPLE_RATE, Audio };
 
 use std::str::FromStr;
 
+use crate::client::help;
+
 // Parse protocal by message from stdin
 pub fn parse_protocol(message: &mut String) -> Option<Vec<u8>>{
     if message.as_str().starts_with(NMTP){
@@ -24,7 +26,12 @@ pub fn parse_protocol(message: &mut String) -> Option<Vec<u8>>{
         // If message is equivalent to : exit we'll break out of our loop
         *message = String::from("exit");
         None
+    }else if message == "help" {
+        help();
+        None
     }else{
+        // Debug
+        println!("message: {}",message);
         // Invalid protocol, panic!
         panic!("Error Protocol!");
     }
@@ -61,7 +68,8 @@ pub fn voip_handler(message: &mut String) -> Vec<u8>{
     let s: Vec<&str> = message.split(' ').collect();
     let size = s[1];
     let size:usize = usize::from_str(size).expect("Fail to convert to usize");
-    assert!(size > 10, "Too long sound length");
+    println!("size: {}", size);
+    assert!(size <= 10, "Too long sound length");
 
     // count the size of buffer to capture sound
     let buffer_size = size * SAMPLE_RATE;
@@ -80,7 +88,7 @@ pub fn voip_handler(message: &mut String) -> Vec<u8>{
 
     // Build message
     *message = format!(
-        "{}: {}",
+        "{}: {}s",
         "NVoIP", size
     );
 

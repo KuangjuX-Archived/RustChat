@@ -44,7 +44,7 @@ impl Audio {
         
         io.readi(&mut buf[0..size]).unwrap();
 
-        println!("Sound Capture: {:?}", buf);
+        // println!("Sound Capture: {:?}", buf);
 
 
         // In case the buffer was larger than 5 seconds, start the stream manually.

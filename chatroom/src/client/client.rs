@@ -7,6 +7,11 @@ use std::str;
 use super::*;
 use protocol::*;
 
+// pub use HELP;
+
+pub fn help() {
+    println!("{}", HELP);
+}
 
 pub struct Client{
     ip: &'static str
@@ -42,12 +47,22 @@ impl Client {
         let message = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
         let message = str::from_utf8(&message).unwrap();
         println!("Message :{:?}", message);
-        if message.starts_with("NVoIP"){
+        if message.rfind("NVoIP") != None{
             true
         }else{
             false
         }
     }
+
+    /*
+    * Sleep function will allow our thread to sleep for a moment.
+    * Our thread will sleep for a hundred milliseconds between each of the loops.
+    */    
+    fn sleep() 
+    {
+        thread::sleep(::std::time::Duration::from_millis(100));
+    }
+
 
 
     // client run!
@@ -70,7 +85,12 @@ impl Client {
                     if Client::display(buffer) {
                         // PalyBack by default linux device
                         let mut sound = vec![0;MESSAGE_SIZE];
-                        client.read_exact(&mut sound).unwrap();
+
+                        // Sleep some times
+                        Client::sleep();
+                        client.read_exact(&mut sound).expect("Fail to get sound");
+                        // Debug
+                        println!("{:?}", sound);
                         let pcm = Audio::new_playback();
                         Audio::set_hw(&pcm);
                         let sound = Audio::u8_to_i16(&sound[..]);
@@ -103,7 +123,6 @@ impl Client {
                     buffer.resize(MESSAGE_SIZE, 0);
                     // Write all of our buffers into our client
                     client.write_all(&buffer).expect("Writing to socket failed");
-                    // Print out the message
                     
                 },
                 /* 
@@ -131,6 +150,8 @@ impl Client {
         {
             // Create a new mutable string
             let mut buffer = String::new();
+            // Remind user to input:
+            println!("Please Input something: (input 'help' to get maunual)");
             // Read into that string from our standard input
             io::stdin().read_line(&mut buffer).expect("Reading from stdin failed");
             // Trim our buffer 
@@ -141,11 +162,13 @@ impl Client {
                 let bytes = message.clone().into_bytes();
                 if sender.send(bytes).is_err(){break}
                 if sender.send(sound).is_err(){break}
+            }else {
+                let bytes = message.clone().into_bytes();
+                // If message is equivalent to : exit we'll break out of our loop
+                if message == "exit" || sender.send(bytes).is_err(){break}
             }
 
-            let bytes = message.clone().into_bytes();
-            // If message is equivalent to : exit we'll break out of our loop
-            if message == "exit" || sender.send(bytes).is_err(){break}
+            
 
         }
         // Print out GOOD BYE
