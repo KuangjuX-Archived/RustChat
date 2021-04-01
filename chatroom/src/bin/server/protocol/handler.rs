@@ -1,26 +1,27 @@
 use std::fs;
 use std::io::prelude::*;
 use super::*;
+use chatroom::{ duplicate_filename, Protocol };
 
 // Parse protocal by message from TcpStream
-pub fn parse_protocol(message: &mut String) -> bool{
+pub fn parse_protocol(message: &mut String) -> Protocol {
     println!("{}", message);
     if message.as_str().starts_with(NMTP){
-        mtp_handler(message);
-        false
+        mtp_handler(message);                      
+        Protocol::NMTP
     }else if message.as_str().starts_with(NFTP){
         ftp_handler(message);
-        false
+        Protocol::NFTP
     }else if message.as_str().starts_with(NVOIP){
         voip_handler(message);
-        true
+        Protocol::NVoIP
     }else if message == "help"{
         *message = String::from("Client view the help manual.");
-        false
+        Protocol::Other
     }else if message == "exit"{
         // If message is equivalent to : exit we'll break out of our loop
         *message = String::from("exit");
-        false
+        Protocol::Other
     }else{
         panic!("Error Protocol!");
     }
@@ -32,10 +33,10 @@ pub fn mtp_handler(message: &mut String){
 }
 
 pub fn ftp_handler(message: &mut String){
-    println!("message: {}", message);
+    // Debug
+    // println!("message: {}", message);
     let s:Vec<&str> = message.split(": ").collect();
 
-    // let mut filename = String::from(s[1]);
     let name:String = String::from(s[1]);
 
     let s2:Vec<&str> = name.split("/").collect();

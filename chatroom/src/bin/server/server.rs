@@ -4,10 +4,9 @@ use std::sync::mpsc;
 use std::thread;
 
 
-
 use super::*;
 use crate::protocol::*;
-// use audio::Audio;
+use chatroom::Protocol;
 
 pub struct Server{
     pub host: &'static str
@@ -40,7 +39,7 @@ impl Server{
 
     
     
-    fn build_message(buffer: Vec<u8>, address: SocketAddr) -> (String, bool){
+    fn build_message(buffer: Vec<u8>, address: SocketAddr) -> (String, Protocol){
         // Take the message that we're receiving 
         // Convert it into an iterator 
         // Take all the characters that are not whitespaces
@@ -48,11 +47,12 @@ impl Server{
         let message = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
         // Convert slice of strings into an actual string 
         let mut message = String::from_utf8(message).expect("Invalid utf8 message");
+        
         // Print out the address sent the message
         // println!("{}: {:?}", address, message);
 
         // Parse Protocol from buffer and build message
-        let is_voip:bool =  parse_protocol(&mut message);
+        let protocol =  parse_protocol(&mut message);
 
         // Concatenate address with message
         let message = format!(
@@ -61,7 +61,7 @@ impl Server{
             message
         );
 
-        ( message, is_voip )
+        ( message, protocol )
     }
 
     pub fn run(&self, listener: TcpListener){
@@ -100,20 +100,26 @@ impl Server{
                     match socket.read_exact(&mut buffer) 
                     {
                         Ok(_) => {
-                            let (message, is_voip) = Server::build_message(buffer, address);
+                            let copy = buffer.clone();
+                            let (message, protocol) = Server::build_message(buffer, address);
                             let bytes = message.clone().into_bytes();
+
                             // Sent out message through our sender to our receiver
                             sender.send(bytes).expect("Failed to send message to receiver");
-                            if is_voip {
-                                let mut sound = vec![0; MESSAGE_SIZE];
-                                socket.read_exact(&mut sound).expect("Fail to receive sound from client");
-                                sender.send(sound).expect("Fail to send sound to receiver");
 
-                                // test receive sound here
-                                // let pcm = Audio::new_playback();
-                                // Audio::set_hw(&pcm);
-                                // let sound = Audio::u8_to_i16(&sound[..]);
-                                // Audio::play(&pcm, sound);
+                            match protocol {
+                                Protocol::NVoIP => {
+                                    let mut sound = vec![0; MESSAGE_SIZE];
+                                    socket.read_exact(&mut sound).expect("Fail to receive sound from client");
+                                    sender.send(sound).expect("Fail to send sound to receiver");
+
+                                },
+
+                                Protocol::NFTP => {
+                                    sender.send(copy).expect("Fail to send file message to receiver");
+                                },
+
+                                _ => {}
                             }
                         },
                         /* 
@@ -157,10 +163,5 @@ impl Server{
 
                 Server::sleep();
         }
-
-        // Print out GOOD BYE
-        // println!("*********************************");
-        // println!("*********** GOOD BYE ************");
-        // println!("*********************************");
     }
 }

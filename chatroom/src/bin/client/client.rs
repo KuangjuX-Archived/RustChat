@@ -9,6 +9,7 @@ use super::*;
 use crate::protocol::*;
 
 use audio::Audio;
+use chatroom::Protocol;
 
 // pub use HELP;
 
@@ -40,20 +41,14 @@ impl Client {
     }
 
 
-    // display message in console
-    pub fn display(buffer: Vec<u8>) -> bool {
-        // Let message equal our buffer 
-        // Turn it into an iterator 
-        // Check to see if the references inside of it are equal to 0 
-        // Collect all of them inside of our vector
-        // All the ones that are equal to 0 are going to just discard
-        let message = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
-        let message = str::from_utf8(&message).unwrap();
-        println!("Message :{:?}", message);
-        if message.rfind("NVoIP") != None{
-            true
+    // parse protocol type
+    pub fn parse_protocol(message: &str) -> Protocol {
+        if message.find("NVoIP") != None{
+            Protocol::NVoIP
+        }else if message.find("NFTP") != None{
+            Protocol::NFTP
         }else{
-            false
+            Protocol::NMTP
         }
     }
 
@@ -84,20 +79,46 @@ impl Client {
             {
                 Ok(_) => 
                 {
-                    // Receive message and display in console
-                    if Client::display(buffer) {
-                        // PalyBack by default linux device
-                        let mut sound = vec![0;MESSAGE_SIZE];
+                    // Let message equal our buffer 
+                    // Turn it into an iterator 
+                    // Check to see if the references inside of it are equal to 0 
+                    // Collect all of them inside of our vector
+                    // All the ones that are equal to 0 are going to just discard
+                    let message = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
+                    let message = str::from_utf8(&message).unwrap();
 
-                        // Sleep some times for receive sound buffers
-                        Client::sleep();
-                        client.read_exact(&mut sound).expect("Fail to get sound");
-                        // Debug
-                        println!("{:?}", sound);
-                        let pcm = Audio::new_playback();
-                        Audio::set_hw(&pcm);
-                        let sound = Audio::u8_to_i16(&sound[..]);
-                        Audio::play(&pcm, sound);
+                    match Client::parse_protocol(message) {
+                        Protocol::NMTP => {
+                            // print message
+                            println!("Message :{:?}", message);
+                        },
+
+                        Protocol::NFTP => {
+                            download_file(message);
+                        },
+
+                        Protocol::NVoIP => {
+                            // PalyBack by default linux device
+                            let mut sound = vec![0;MESSAGE_SIZE];
+
+                            // Sleep some times for receive sound buffers
+                            Client::sleep();
+                            client.read_exact(&mut sound).expect("Fail to get sound");
+
+                            // Debug
+                            // println!("{:?}", sound);
+
+                            let pcm = Audio::new_playback();
+                            Audio::set_hw(&pcm);
+                            let sound = Audio::u8_to_i16(&sound[..]);
+                            Audio::play(&pcm, sound);
+
+                            Client::sleep();
+
+                            println!("Playback sound end.");
+                        }, 
+
+                        _ => {}
                     }
                 },
 

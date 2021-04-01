@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::prelude::*;
 use super::*;
 use crate::MESSAGE_SIZE;
 use audio::{ SAMPLE_RATE, Audio };
@@ -6,6 +7,8 @@ use audio::{ SAMPLE_RATE, Audio };
 use std::str::FromStr;
 
 use crate::client::{ help, Client };
+use chatroom::duplicate_filename;
+
 
 // Parse protocal by message from stdin
 pub fn parse_protocol(message: &mut String) -> Option<Vec<u8>>{
@@ -52,6 +55,7 @@ pub fn ftp_handler(message: &mut String){
     let s: Vec<&str> = message.split(NFTP).collect();
     let filename:&str = s[1];
 
+    // println!("filename: {}", filename);
     let contents = fs::read_to_string(filename).expect("Fail to read file!");
     if contents.len() > MESSAGE_SIZE {
         *message = String::from("Out of Buffer limit!");
@@ -97,4 +101,35 @@ pub fn voip_handler(message: &mut String) -> Vec<u8>{
 
     // return a vector conveted by slice
     Audio::i16_to_u8(&sound[0..buffer_size]).to_vec()
+}
+
+
+pub fn download_file(message: &str) {
+    let message = String::from(message);
+    let s:Vec<&str> = message.split(":").collect();
+
+    let name:String = String::from(s[1]);
+
+    let s2:Vec<&str> = name.split("/").collect();
+    let mut filename:String = String::from("client_files/");
+    filename.push_str(s2[1]);
+    let contents = s[2];
+
+    // solve filename conflict
+    duplicate_filename(&mut filename, 0);
+
+    let copy_filename = filename.clone();
+    match fs::File::create(filename) {
+        Ok(handler) => {
+            let mut file = handler;
+            if file.write_all(contents.as_bytes()).is_err(){
+                println!("Fail to download file {}", copy_filename);
+            }
+        
+            println!("Success to download file {}", copy_filename);
+        }
+        Err(err) => {
+            println!("error: {}", err);
+        }
+    }
 }
