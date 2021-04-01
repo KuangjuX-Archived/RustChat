@@ -1,4 +1,4 @@
-# Network Chat Room
+# Network ChatRoom
 
 ## Introduction
 
@@ -18,5 +18,10 @@
 
 ## TODO List
 
-- [ ] 即时聊天
-- [ ] 使用异步代替多线程
+- [ ] 好看的GUI
+- [ ] 异步IO代替多线程
+- [ ] 即时通信
+
+## Demo
+
+![](static/run_0.jpg)
