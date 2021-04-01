@@ -8,4 +8,3 @@ edition = "2018"
 
 [dependencies]
 alsa = "*"
-cpal = "0.13.2"

@@ -70,6 +70,7 @@ pub fn voip_handler(message: &mut String) -> Vec<u8>{
     let size:usize = usize::from_str(size).expect("Fail to convert to usize");
     println!("size: {}", size);
 
+    // Sleep to solve delay bugs
     Client::sleep();
     assert!(size <= 10, "Too long sound length");
 
