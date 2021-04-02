@@ -25,3 +25,15 @@
 ## Demo
 
 ![](static/run_0.jpg)
+
+## Usage
+
+```
+git clone https://github.com/KuangjuX/Network-Chatroom.git
+cd Network-Chatroom/chatroom
+```
+
+运行服务端：`cargo run --bin server`
+
+运行客户端：`cargo run --bin client`
+
