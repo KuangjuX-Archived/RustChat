@@ -1,13 +1,14 @@
 use std::fs;
 use std::io::prelude::*;
-use super::*;
 use crate::MESSAGE_SIZE;
 use audio::{ SAMPLE_RATE, Audio };
 
 use std::str::FromStr;
 
 use crate::client::{ help, Client };
-use chatroom::duplicate_filename;
+use chatroom::{ 
+    NMTP, NFTP, NVOIP, duplicate_filename 
+};
 
 
 // Parse protocal by message from stdin

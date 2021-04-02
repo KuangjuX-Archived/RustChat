@@ -14,8 +14,7 @@ pub fn duplicate_filename(filename: &mut String, mut num: usize){
             file.push_str(num.to_string().as_str());
             file.push_str(".");
             file.push_str(extension);
-            // *filename = file;
-            // println!("filename: {}", filename);
+            
             clone_filename = file;
         }
     }

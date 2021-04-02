@@ -1,7 +1,11 @@
 use std::fs;
 use std::io::prelude::*;
-use super::*;
-use chatroom::{ duplicate_filename, Protocol };
+use chatroom::{ 
+    NMTP, NFTP, NVOIP, FILE_SUCCESS, FILE_FAIL_RESPONSE, 
+    FILE_SUCCESS_RESPONSE, Protocol, duplicate_filename 
+};
+
+
 
 // Parse protocal by message from TcpStream
 pub fn parse_protocol(message: &mut String) -> Protocol {
