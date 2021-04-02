@@ -94,6 +94,9 @@ pub fn voip_handler(message: &mut String) -> Vec<u8>{
     // capture sound by device
     let sound = Audio::capture(&pcm, buffer_size);
 
+    // Display sound have been caputered
+    println!("Sound have been caputered.");
+
     // Build message
     *message = format!(
         "{}: {}s",

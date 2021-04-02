@@ -8,7 +8,7 @@ use super::*;
 
 use crate::protocol::*;
 
-use audio::Audio;
+use audio::{ Audio, SAMPLE_RATE };
 use chatroom::{ Protocol, logo };
 
 // pub use HELP;
@@ -59,6 +59,11 @@ impl Client {
     pub fn sleep() 
     {
         thread::sleep(::std::time::Duration::from_millis(100));
+    }
+
+    pub fn main_sleep()
+    {
+        thread::sleep(::std::time::Duration::from_secs(1));
     }
 
 
@@ -181,23 +186,26 @@ impl Client {
             let mut message = buffer.trim().to_string();
 
             if let Some(sound) = parse_protocol(&mut message){
+                let secs = sound.len() / (SAMPLE_RATE * 2) ;
                 let bytes = message.clone().into_bytes();
                 if sender.send(bytes).is_err(){break}
                 if sender.send(sound).is_err(){break}
+
+                // Sleep to wait 
+                thread::sleep(::std::time::Duration::from_secs((secs + 5) as u64));
+
             }else {
                 let bytes = message.clone().into_bytes();
                 // If message is equivalent to : exit we'll break out of our loop
                 if message == "exit" || sender.send(bytes).is_err(){break}
             }
 
-            
+            Client::main_sleep();
 
         }
 
         // Print out GOOD BYE
+        println!("Good Bye!");
         println!("{}", logo);
-        println!("*********************************");
-        println!("*********** GOOD BYE ************");
-        println!("*********************************");
     }
 }
