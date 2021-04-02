@@ -12,9 +12,11 @@ mod protocol;
 
 use client::*;
 
+
 fn main() 
-{  
+{
     let client = Client::new(LOCAL_HOST);
     let connect = client.connect();
     client.run(connect);
 }
+

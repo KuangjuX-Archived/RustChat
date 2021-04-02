@@ -1,5 +1,7 @@
 mod utils;
+mod logo;
 pub use utils::*;
+pub use logo::logo;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Protocol {

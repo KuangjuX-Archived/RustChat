@@ -6,7 +6,7 @@ use std::thread;
 
 use super::*;
 use crate::protocol::*;
-use chatroom::Protocol;
+use chatroom::{ Protocol, logo };
 
 pub struct Server{
     pub host: &'static str
@@ -72,9 +72,8 @@ impl Server{
         // We are going to be sending a bunch of strings through channel
         let (sender, receiver) = mpsc::channel::<Vec<u8>>();
 
-        println!("********************************");
-        println!("Welcome to KuangjuX Naive Server");
-        println!("********************************");
+        // Print logo
+        println!("{}", logo);
         
         loop 
         {   
