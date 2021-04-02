@@ -9,7 +9,7 @@ use super::*;
 use crate::protocol::*;
 
 use audio::{ Audio, SAMPLE_RATE };
-use chatroom::{ Protocol, logo };
+use chatroom::{ Protocol, LOGO };
 
 // pub use HELP;
 
@@ -171,7 +171,7 @@ impl Client {
 
 
         // This will show up when the user opens the client
-        println!("{}", logo);
+        println!("{}", LOGO);
 
         loop 
         {
@@ -206,6 +206,6 @@ impl Client {
 
         // Print out GOOD BYE
         println!("Good Bye!");
-        println!("{}", logo);
+        println!("{}", LOGO);
     }
 }

@@ -6,7 +6,7 @@ use std::thread;
 
 use super::*;
 use crate::protocol::*;
-use chatroom::{ Protocol, logo };
+use chatroom::{ Protocol, LOGO };
 
 pub struct Server{
     pub host: &'static str
@@ -73,7 +73,7 @@ impl Server{
         let (sender, receiver) = mpsc::channel::<Vec<u8>>();
 
         // Print logo
-        println!("{}", logo);
+        println!("{}", LOGO);
         
         loop 
         {   

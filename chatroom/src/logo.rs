@@ -1,1 +1,1 @@
-pub const logo: &'static str = include_str!("logo.txt");
+pub const LOGO: &'static str = include_str!("logo.txt");
