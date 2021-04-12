@@ -34,6 +34,7 @@
 - [x] 异常处理
 - [x] 延迟处理
 - [x] 高并发处理
+- [x] Docker支持
 
 ## TODO List
 
@@ -48,8 +49,8 @@
 ## Usage
 
 ```
-git clone https://github.com/KuangjuX/Network-Chatroom.git
-cd Network-Chatroom/chatroom
+git clone https://github.com/KuangjuX/Rust-Chat.git
+cd Rust-Chat/chatroom
 ```
 
 运行服务端：`cargo run --bin server`
