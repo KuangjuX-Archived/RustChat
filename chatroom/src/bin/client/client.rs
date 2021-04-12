@@ -192,12 +192,17 @@ impl Client {
                 if sender.send(sound).is_err(){break}
 
                 // Sleep to wait 
-                thread::sleep(::std::time::Duration::from_secs((secs + 5) as u64));
+                // thread::sleep(::std::time::Duration::from_secs((secs + 5) as u64));
 
             }else {
                 let bytes = message.clone().into_bytes();
                 // If message is equivalent to : exit we'll break out of our loop
-                if message == "exit" || sender.send(bytes).is_err(){break}
+                if message == "exit" || sender.send(bytes.clone()).is_err(){
+                    // sender.send(bytes).unwrap();
+                    println!("Error message: {}", message);
+                    println!("bytes: {:?}", bytes);
+                    break
+                }
             }
 
             Client::main_sleep();

@@ -27,7 +27,10 @@ pub fn parse_protocol(message: &mut String) -> Protocol {
         *message = String::from("exit");
         Protocol::Other
     }else{
-        panic!("Error Protocol!");
+        // panic!("Error Protocol!");
+        println!("Error Protocol!");
+        // *message = String::from("Error Protocol");
+        Protocol::Other
     }
 }
 

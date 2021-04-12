@@ -32,14 +32,14 @@ impl Server{
     * Sleep function will allow our thread to sleep for a moment.
     * Our thread will sleep for a hundred milliseconds between each of the loops.
     */    
-    fn sleep() 
+    pub fn sleep() 
     {
         thread::sleep(::std::time::Duration::from_millis(100));
     }
 
     
     
-    fn build_message(buffer: Vec<u8>, address: SocketAddr) -> (String, Protocol){
+    pub fn build_message(buffer: Vec<u8>, address: SocketAddr) -> (String, Protocol){
         // Take the message that we're receiving 
         // Convert it into an iterator 
         // Take all the characters that are not whitespaces
