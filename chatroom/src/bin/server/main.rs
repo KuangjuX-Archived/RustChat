@@ -1,12 +1,16 @@
 mod server;
 mod protocol;
 use server::*;
+use chatroom::*;
+
+
 
 // Localhost with a port in it
 const LOCAL_HOST: &str = "127.0.0.1:8088";
 
 // The buffer size of messages
 const MESSAGE_SIZE: usize = 1024 * 1024;
+
 
 
 fn main()
@@ -16,5 +20,4 @@ fn main()
 
     // Listen IP and response
     server.run(listener);
-    
-}            
+}           

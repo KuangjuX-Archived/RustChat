@@ -3,12 +3,36 @@ mod logo;
 pub use utils::*;
 pub use logo::LOGO;
 
-#[derive(Clone, Copy, PartialEq)]
+
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Protocol {
     NMTP,
     NFTP,
     NVoIP,
     Other
+}
+
+#[repr(C, packed)]
+#[derive(Debug, Clone)]
+pub struct Stream {
+    pub protocol: Protocol,
+    pub message: Vec<u8>,
+    pub size: usize
+}
+
+impl Stream {
+    pub unsafe fn serialize (&self) -> Vec<u8> {
+        ::std::slice::from_raw_parts(
+            (self as *const Stream) as *const u8,
+            ::std::mem::size_of::<Stream>(),
+        ).to_vec()
+    }
+    
+    pub unsafe fn deserialize(bytes: Vec<u8>) -> Stream {
+        let (head, body, _) = bytes.align_to::<Stream>();
+        assert!(head.is_empty(), "Deserialize data fail!");
+        body[0].clone()
+    }
 }
 
 
