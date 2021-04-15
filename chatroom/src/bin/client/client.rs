@@ -8,8 +8,8 @@ use super::*;
 
 use crate::protocol::*;
 
-use audio::{ Audio, SAMPLE_RATE };
-use chatroom::{ Protocol, LOGO };
+use audio::{ Audio };
+use chatroom::*;
 
 // pub use HELP;
 
@@ -185,19 +185,30 @@ impl Client {
             // Use the to string method to put it into a message variable 
             let mut message = buffer.trim().to_string();
 
-            if let Some(sound) = parse_protocol(&mut message){
-                let secs = sound.len() / (SAMPLE_RATE * 2) ;
-                let bytes = message.clone().into_bytes();
-                if sender.send(bytes).is_err(){break}
-                if sender.send(sound).is_err(){break}
+            // if let Some(sound) = parse_protocol(&mut message){
+            //     let secs = sound.len() / (SAMPLE_RATE * 2) ;
+            //     let bytes = message.clone().into_bytes();
+            //     if sender.send(bytes).is_err(){break}
+            //     if sender.send(sound).is_err(){break}
 
-                // Sleep to wait 
-                thread::sleep(::std::time::Duration::from_secs((secs + 5) as u64));
+            //     // Sleep to wait 
+            //     thread::sleep(::std::time::Duration::from_secs((secs + 5) as u64));
 
+            // }else {
+            //     let bytes = message.clone().into_bytes();
+            //     // If message is equivalent to : exit we'll break out of our loop
+            //     if message == "exit" || sender.send(bytes).is_err(){break}
+            // }
+
+            if let Some(stream) = parse_protocol(&mut message) {
+                let my_struct = unsafe { Stream::deserialize(&stream) };
+                println!("stream_2: {:?}", stream);
+                println!("my_struct_3: {:?}", my_struct);
+
+                // if sender.send(stream).is_err(){break}
             }else {
-                let bytes = message.clone().into_bytes();
                 // If message is equivalent to : exit we'll break out of our loop
-                if message == "exit" || sender.send(bytes).is_err(){break}
+                if message == "exit" {break}
             }
 
             Client::main_sleep();

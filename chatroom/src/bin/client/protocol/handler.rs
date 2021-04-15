@@ -6,21 +6,22 @@ use audio::{ SAMPLE_RATE, Audio };
 use std::str::FromStr;
 
 use crate::client::{ help, Client };
-use chatroom::{ 
-    NMTP, NFTP, NVOIP, duplicate_filename 
-};
+use chatroom::*;
 
 
 // Parse protocal by message from stdin
 pub fn parse_protocol(message: &mut String) -> Option<Vec<u8>>{
     if message.as_str().starts_with(NMTP){
         // handler Message 
-        mtp_handler(message);
-        None
+        let stream = mtp_handler(message);
+        let my_struct = unsafe{Stream::deserialize(&stream)};
+        println!("my_struct_2: {:?}", my_struct);
+        Some(stream)
+        // None
     }else if message.as_str().starts_with(NFTP){
         // handler File
-        ftp_handler(message);
-        None
+        let stream = ftp_handler(message);
+        Some(stream)
     }else if message.as_str().starts_with(NVOIP){
         // handler Audio
         let sound = voip_handler(message);
@@ -44,27 +45,60 @@ pub fn parse_protocol(message: &mut String) -> Option<Vec<u8>>{
 // NMTP handler function
 // Split message to get client's content
 // send content to sender
-pub fn mtp_handler(message: &mut String){
-    let s:Vec<&str> = message.split(NMTP).collect();
-    *message = format!(
-        "{}: {}",
-        "NMTP", s[1]
+pub fn mtp_handler(message: &mut String) -> Vec<u8>{
+    let msg: Vec<&str> = message.split(NMTP).collect();
+    let msg = format!(
+        "{}", msg[1]
     );
+    // println!("msg: {}", msg);
+    let msg = msg.as_bytes().to_vec();
+    // println!("msg: {:?}", msg);
+    let stream = Stream {
+        protocol: Protocol::NMTP,
+        contents: msg,
+        size: MESSAGE_SIZE
+    };
+
+    let bytes:Vec<u8>;
+    unsafe {
+        bytes = stream.serialize();
+        // let my_struct = Stream::deserialize(&bytes);
+        println!("bytes_1: {:?}", bytes);
+        // println!("my_struct_1: {:?}", my_struct);
+    }
+    bytes
 }
 
-pub fn ftp_handler(message: &mut String){
+pub fn ftp_handler(message: &mut String) -> Vec<u8> {
     let s: Vec<&str> = message.split(NFTP).collect();
     let filename:&str = s[1];
 
-    // println!("filename: {}", filename);
     let contents = fs::read_to_string(filename).expect("Fail to read file!");
     if contents.len() > MESSAGE_SIZE {
-        *message = String::from("Out of Buffer limit!");
+        // *message = String::from("Out of Buffer limit!");
+        panic!("File size out of buffer limit");
     }else{
-        *message = format!(
-            "{}: {}: {}",
-            "NFTP", String::from(filename), contents
+        // *message = format!(
+        //     "{}: {}: {}",
+        //     "NFTP", String::from(filename), contents
+        // );
+        let msg = format!(
+            "{}: {}",
+            String::from(filename), contents
         );
+
+        let msg = msg.as_bytes().to_vec();
+
+        let stream = Stream{
+            protocol: Protocol::NFTP,
+            contents: msg,
+            size: MESSAGE_SIZE
+        };
+
+        unsafe{
+            let bytes = stream.serialize();
+            bytes
+        }
     }
     
 }
@@ -98,13 +132,24 @@ pub fn voip_handler(message: &mut String) -> Vec<u8>{
     println!("Sound have been caputered.");
 
     // Build message
-    *message = format!(
-        "{}: {}s",
-        "NVoIP", size
-    );
+    // *message = format!(
+    //     "{}: {}s",
+    //     "NVoIP", size
+    // );
 
     // return a vector conveted by slice
-    Audio::i16_to_u8(&sound[0..buffer_size]).to_vec()
+    let sound = Audio::i16_to_u8(&sound[0..buffer_size]).to_vec();
+
+    let stream = Stream{
+        protocol: Protocol::NVoIP,
+        contents: sound,
+        size: MESSAGE_SIZE
+    };
+
+    unsafe {
+        let bytes = stream.serialize();
+        bytes
+    }
 }
 
 

@@ -39,20 +39,18 @@ impl Server{
 
     
     
-    fn build_message(buffer: Vec<u8>, address: SocketAddr) -> (String, Protocol){
+    fn build_message(buffer: Vec<u8>, address: SocketAddr) {
         // Take the message that we're receiving 
         // Convert it into an iterator 
         // Take all the characters that are not whitespaces
         // Collect them inside of out vector 
-        let message = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
+        let bytes = buffer.into_iter().take_while(|&x| x != 0).collect::<Vec<_>>();
         // Convert slice of strings into an actual string 
-        let mut message = String::from_utf8(message).expect("Invalid utf8 message");
+        // let mut message = String::from_utf8(message).expect("Invalid utf8 message");
         
-        // Print out the address sent the message
-        // println!("{}: {:?}", address, message);
 
         // Parse Protocol from buffer and build message
-        let protocol =  parse_protocol(&mut message);
+        let message = parse_protocol(bytes);
 
         // Concatenate address with message
         let message = format!(
@@ -61,7 +59,8 @@ impl Server{
             message
         );
 
-        ( message, protocol )
+        println!("{}", message);
+        
     }
 
     pub fn run(&self, listener: TcpListener){
@@ -100,26 +99,12 @@ impl Server{
                     {
                         Ok(_) => {
                             let copy = buffer.clone();
-                            let (message, protocol) = Server::build_message(buffer, address);
-                            let bytes = message.clone().into_bytes();
+                            Server::build_message(buffer, address);
+                            // let bytes = message.clone().into_bytes();
 
                             // Sent out message through our sender to our receiver
-                            sender.send(bytes).expect("Failed to send message to receiver");
+                            sender.send(copy).expect("Failed to send message to receiver");
 
-                            match protocol {
-                                Protocol::NVoIP => {
-                                    let mut sound = vec![0; MESSAGE_SIZE];
-                                    socket.read_exact(&mut sound).expect("Fail to receive sound from client");
-                                    sender.send(sound).expect("Fail to send sound to receiver");
-
-                                },
-
-                                Protocol::NFTP => {
-                                    sender.send(copy).expect("Fail to send file message to receiver");
-                                },
-
-                                _ => {}
-                            }
                         },
                         /* 
                         * If the type of error is equal to an error that would block our non-blocking,

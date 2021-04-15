@@ -3,6 +3,8 @@ mod logo;
 pub use utils::*;
 pub use logo::LOGO;
 
+use std::ptr;
+
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Protocol {
@@ -12,26 +14,35 @@ pub enum Protocol {
     Other
 }
 
-#[repr(C, packed)]
 #[derive(Debug, Clone)]
+#[repr(C, packed)]
 pub struct Stream {
     pub protocol: Protocol,
-    pub message: Vec<u8>,
-    pub size: usize
+    pub size: usize,
+    pub contents: Vec<u8>
 }
 
 impl Stream {
     pub unsafe fn serialize (&self) -> Vec<u8> {
-        ::std::slice::from_raw_parts(
+        let bytes = ::std::slice::from_raw_parts(
             (self as *const Stream) as *const u8,
             ::std::mem::size_of::<Stream>(),
-        ).to_vec()
+        ).to_vec();
+
+        // let my_struct = Stream::deserialize(&bytes);
+        // println!("my_struct_0:{:?}", my_struct);
+        println!("bytes_0:{:?}", bytes);
+        bytes
     }
     
-    pub unsafe fn deserialize(bytes: Vec<u8>) -> Stream {
-        let (head, body, _) = bytes.align_to::<Stream>();
+    pub unsafe fn deserialize(bytes: &Vec<u8>) -> Self {
+        let (head, body, tail) = bytes.align_to::<Stream>();
         assert!(head.is_empty(), "Deserialize data fail!");
+        // println!("body: {:?}", body[0].clone());
+        // println!("tail: {:?}", tail);
         body[0].clone()
+        
+        
     }
 }
 

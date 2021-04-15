@@ -1,6 +1,7 @@
 mod server;
 mod protocol;
 use server::*;
+
 use chatroom::*;
 
 
@@ -20,4 +21,18 @@ fn main()
 
     // Listen IP and response
     server.run(listener);
+
+    // let test:Vec<u8> = vec![1,2,3,4,5];
+
+    // let stream = Stream {
+    //     protocol: Protocol::NMTP,
+    //     content: test,
+    //     size: 0
+    // };
+
+    // let bytes = unsafe{stream.serialize()};
+
+    // let my_struct = unsafe{Stream::deserialize(bytes)};
+
+    // println!("{:?}", my_struct);
 }           
