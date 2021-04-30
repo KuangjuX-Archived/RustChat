@@ -1,5 +1,5 @@
 // Localhost with a port in it
-pub const LOCAL_HOST: &str = "127.0.0.1:8080";
+pub const LOCAL_HOST: &str = "127.0.0.1:8088";
 
 // The buffer size of messages
 pub const MESSAGE_SIZE: usize = 1024 * 1024;

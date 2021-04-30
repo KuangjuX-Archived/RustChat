@@ -36,6 +36,7 @@ impl Stream {
 }
 
 
+
 // NMTP is Naive Message Transfor Protocol 
 pub const NMTP: &'static str = "NMTP: ";
 

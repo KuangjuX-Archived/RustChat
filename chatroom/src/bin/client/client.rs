@@ -107,7 +107,7 @@ impl Client {
                             let mut sound = vec![0;MESSAGE_SIZE];
 
                             // Sleep some times for receive sound buffers
-                            Client::sleep();
+                            // Client::sleep();
                             client.read_exact(&mut sound).expect("Fail to get sound");
 
                             // Debug
