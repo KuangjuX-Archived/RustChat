@@ -44,6 +44,7 @@ async fn main() -> Result<(), Box<dyn Error>>
         let (mut socket, address) = listener.accept().await?;
 
         println!("Client {}: CONNECTED", address);
+        
         // Clone sender
         // The socket tries to clone it and then push it to clients vector 
         // We're cloning the socket to push it into our thread 
