@@ -63,7 +63,8 @@ impl Server{
 
         ( message, protocol )
     }
-
+    
+    
     pub fn run(&self, listener: TcpListener){
         // Create mutable vector for clients
         let mut clients = vec![];
